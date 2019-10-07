@@ -41,6 +41,7 @@ $id = $escrever['id'];
 x<?php echo $id; ?><input type='text' id="x<?php echo $id; ?>" name="x<?php echo $id; ?>" value="<?php echo $escrever['x']; ?>">
 y<?php echo $id; ?><input type='text' id="y<?php echo $id; ?>" name="y<?php echo $id; ?>" value="<?php echo $escrever['y']; ?>">
 z<?php echo $id; ?><input type='text' id="z<?php echo $id; ?>" name="z<?php echo $id; ?>" value="<?php echo $escrever['z']; ?>"> 
+n<?php echo $id; ?><input type='text' id="n<?php echo $id; ?>" name="n<?php echo $id; ?>" value="<?php echo $escrever['n']; ?>"> 
 <button type="button" class="btn btn-danger" onclick="subInput(<?php echo $id; ?>);">-</button><br>
 <?php
   }
@@ -71,8 +72,9 @@ for($i=0;$i<($qtdTOtal+1);$i++) {
   $x = $post["x$i"];
   $y = $post["y$i"];
   $z = $post["z$i"];
+  $n = $post["n$i"];
 if(!empty($x)) {  
-$insert = "INSERT INTO md.inputs (id, X, Y, z, n) VALUES ('$i', '$x', '$y', '$z', null);";  # isnull $x0 = 0;
+$insert = "INSERT INTO md.inputs (id, x, y, z, n) VALUES ('$i', '$x', '$y', '$z', '$n');";  # isnull $x0 = 0;
 $statement = $pdo->prepare($insert);
 $statement->execute();
 }
@@ -103,11 +105,13 @@ for(i=0; i < val; i++) {
 var valorX = document.getElementById('x'+i).value;
 var valorY = document.getElementById('y'+i).value;
 var valorZ = document.getElementById('z'+i).value;
+var valorN = document.getElementById('n'+i).value;
 
   inputText  =  inputText + 
   " x" +i+"<input type='text' id='x"+i+"' name='x"+i+"' value='"+valorX+"'>"+ 
   " y"+i+"<input type='text' id='y"+i+"' name='y"+i+"' value='"+valorY+"'>" + 
   " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+valorZ+"'>" + 
+  " n"+i+"<input type='text' id='n"+i+"' name='n"+i+"' value='"+valorN+"'>" + 
   " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
 }
 
@@ -115,6 +119,7 @@ inputText  =  inputText +
   " x" +i+ "<input type='text' id='x"+i+"' name='x"+i+"' value='"+"0.0"+"'>"+ 
   " y"+i+"<input type='text' id='y"+i+"' name='y"+i+"' value='"+"0.0"+"'>" + 
   " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+"0.0"+"'>" +  
+  " n"+i+"<input type='text' id='n"+i+"' name='n"+i+"' value='"+"0.0"+"'>" +  
   " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
 
 document.getElementById("divInputText").innerHTML = inputText;
@@ -140,12 +145,14 @@ for(i=0; i < (val ); i++) {
 var valorX = document.getElementById('x'+i).value;
 var valorY = document.getElementById('y'+i).value;
 var valorZ = document.getElementById('z'+i).value;
+var valorN = document.getElementById('n'+i).value;
 
   if(i != posicao) {
     inputText  =  inputText + 
     " x" +id+ "<input type='text' id='x"+id+"' name='x"+id+"' value='"+valorX+"'>"+ 
     " y"+id+"<input type='text' id='y"+id+"' name='y"+id+"' value='"+valorY+"'>" + 
     " z"+id+"<input type='text' id='z"+id+"' name='z"+id+"' value='"+valorZ+"'>" + 
+    " n"+id+"<input type='text' id='n"+id+"' name='n"+id+"' value='"+valorN+"'>" + 
     " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
     id++;
   }
