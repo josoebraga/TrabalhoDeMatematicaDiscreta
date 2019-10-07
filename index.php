@@ -27,7 +27,9 @@ $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
 <?php 
 
-$qsinputs = "SELECT * FROM md.inputs ORDER BY x DESC, y DESC, z DESC;";
+#$qsinputs = "SELECT * FROM md.inputs ORDER BY x DESC, y DESC, z DESC;";
+$qsinputs = "SELECT * FROM md.inputs ORDER BY id ASC;";
+
 
 $query = $pdo->prepare($qsinputs);
 $query->execute();
@@ -38,7 +40,8 @@ $id = $escrever['id'];
 ?>
 x<?php echo $id; ?><input type='text' id="x<?php echo $id; ?>" name="x<?php echo $id; ?>" value="<?php echo $escrever['x']; ?>">
 y<?php echo $id; ?><input type='text' id="y<?php echo $id; ?>" name="y<?php echo $id; ?>" value="<?php echo $escrever['y']; ?>">
-z<?php echo $id; ?><input type='text' id="z<?php echo $id; ?>" name="z<?php echo $id; ?>" value="<?php echo $escrever['z']; ?>"><br>
+z<?php echo $id; ?><input type='text' id="z<?php echo $id; ?>" name="z<?php echo $id; ?>" value="<?php echo $escrever['z']; ?>"> 
+<button type="button" class="btn btn-danger" onclick="subInput(<?php echo $id; ?>);">-</button><br>
 <?php
   }
 ?>
@@ -58,7 +61,7 @@ if(!empty($post['x0']) && !empty($post['y0']) /*&& !empty($post['x1']) && !empty
 
 $statement = $pdo->prepare("TRUNCATE TABLE md.inputs;");
 $statement->execute();
-
+#Em breve, update pela coluna ID se não tiver valores;
 
 for($i=0;$i<100;$i++) {
   if(!empty($post["x$i"])) { $qtdTOtal = $i; }
@@ -90,6 +93,7 @@ $statement->execute();
 <script>
 
 function addInput() {
+
   var val = 0;
   var inputText = "";
   val = document.getElementById('controle').value * 1 + 1 ;
@@ -101,15 +105,17 @@ var valorY = document.getElementById('y'+i).value;
 var valorZ = document.getElementById('z'+i).value;
 
   inputText  =  inputText + 
-  " x" + i + "<input type='text' id='x"+i+"' name='x"+i+"' value='"+valorX+"'>"+ 
+  " x" +i+"<input type='text' id='x"+i+"' name='x"+i+"' value='"+valorX+"'>"+ 
   " y"+i+"<input type='text' id='y"+i+"' name='y"+i+"' value='"+valorY+"'>" + 
-  " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+valorZ+"'>" +"<br>";
+  " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+valorZ+"'>" + 
+  " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
 }
 
 inputText  =  inputText + 
-  " x" + i + "<input type='text' id='x"+i+"' name='x"+i+"' value='"+"0.0"+"'>"+ 
+  " x" +i+ "<input type='text' id='x"+i+"' name='x"+i+"' value='"+"0.0"+"'>"+ 
   " y"+i+"<input type='text' id='y"+i+"' name='y"+i+"' value='"+"0.0"+"'>" + 
-  " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+"0.0"+"'>" +"<br>";
+  " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+"0.0"+"'>" +  
+  " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
 
 document.getElementById("divInputText").innerHTML = inputText;
 
@@ -119,6 +125,41 @@ document.getElementById('controle').value = val;
 
 </script>
 
+<script>
+
+function subInput(posicao) {
+
+//id="controle" = xyz;
+
+  
+  var val = 0;
+  var inputText = "";
+  val = document.getElementById('controle').value * 1 + 1 ;
+id = 0;
+for(i=0; i < (val ); i++) {
+var valorX = document.getElementById('x'+i).value;
+var valorY = document.getElementById('y'+i).value;
+var valorZ = document.getElementById('z'+i).value;
+
+  if(i != posicao) {
+    inputText  =  inputText + 
+    " x" +id+ "<input type='text' id='x"+id+"' name='x"+id+"' value='"+valorX+"'>"+ 
+    " y"+id+"<input type='text' id='y"+id+"' name='y"+id+"' value='"+valorY+"'>" + 
+    " z"+id+"<input type='text' id='z"+id+"' name='z"+id+"' value='"+valorZ+"'>" + 
+    " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
+    id++;
+  }
+}
+
+document.getElementById("divInputText").innerHTML = inputText;
+
+document.getElementById("divInputText").innerHTML = inputText;
+
+document.getElementById('controle').value = (id);  
+
+}
+
+</script>
 
 </html>
 
