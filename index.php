@@ -14,7 +14,7 @@
   
 
 <?php
-
+#https://www.easycalculation.com/algebra/gauss-seidel-method.php
 include 'conectar.php';
 
 $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
@@ -25,7 +25,9 @@ $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 <br>
 <Span>Critério de Parada (Usuário): </Span><input type="text" id="criterioDeParada" name="criterioDeParada">
 &hArr;
-<Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="0.9"readonly>
+<Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="0.001"readonly>
+<br><br>
+<Span>Arredontamento:  </Span><input type="number" id="arredontamento" name="arredontamento" value="5">
 <br><br>
 <div id="divInputText">
 
@@ -105,25 +107,62 @@ $statement->execute();
 
 function calcular() {
 
+arred = document.getElementById("arredontamento").value; 
+var texto = "";  
 var i = 0 * 1;
 var resultX0 = 0;
 var n0 = document.getElementById("n0").value * 1; 
 var x1 = document.getElementById("x1").value * 1;  
 var x0 = document.getElementById("x0").value * 1;  
-
+var n1 = document.getElementById("n1").value * 1;  
+var n2 = document.getElementById("n2").value * 1;  
+var y1 = document.getElementById("y1").value * 1;  
+var z2 = document.getElementById("z2").value * 1;  
 var deltaX1 = []
+var deltaX2 = []
+var deltaX3 = []
+var deltaX1Max = []
+var deltaX2Max = []
+var deltaX3Max = []
 
 //while(i < 0.99 /*resultX0 < 0.99*/ /* Critério System */  /* || resultX0 < criterioUsuario */) {
-//( (n0 + x1 * i -i) /  x0 )
-deltaX1.push( ( (n0 + x1 * i -i) /  x0 ) );
 
-document.getElementById("divCalculo").innerHTML =deltaX1[i];
+for(i=0; i< 6; i++) {
+//while(i == 0 || deltaX1Max[i]*1 != 1 && deltaX1Max[i]*1 >= 1 && deltaX1Max[i]*1 < 2) {
 
-//i++;
-//}
+if( i == 0) {  
+deltaX1.push( 0 );
+deltaX2.push( 0 );
+deltaX3.push( 0 );
+deltaX1Max.push(0);
+deltaX2Max.push(0);
+deltaX3Max.push(0);
+} else {
+
+deltaX1.push( parseFloat((n0 + 2 * deltaX2[i-1] - deltaX3[i-1]) /  x0).toPrecision(arred) * 1 );
+deltaX2.push( parseFloat((n1 - 2 * deltaX1[i] + deltaX3[i-1]) /  y1).toPrecision(arred) * 1 );
+deltaX3.push( parseFloat((n2 - deltaX1[i] + 3 * deltaX2[i] ) /  z2).toPrecision(arred) * 1 );
+
+deltaX1Max.push((deltaX1[i] - deltaX1Max[i-1])*1);
+deltaX2Max.push((deltaX2[i] - deltaX2Max[i-1])*1);
+deltaX3Max.push((deltaX3[i] - deltaX3Max[i-1])*1);
+
+}
+
+texto = texto + deltaX1[i] + ' - ' + deltaX2[i] + ' - ' + deltaX3[i] + '<br>';
+/* i++;
+} */
+
+}
+
+
+document.getElementById("divCalculo").innerHTML = texto;
+
+
 }
 
 </script>
+
 
 <script>
 
