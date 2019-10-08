@@ -162,7 +162,7 @@ document.getElementById("divInputText").innerHTML = inputText;
 
 document.getElementById("divInputText").innerHTML = inputText;
 
-document.getElementById('controle').value = (id);  
+document.getElementById('controle').value = (id-1);  
 
 }
 
