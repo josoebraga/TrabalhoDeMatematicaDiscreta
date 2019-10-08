@@ -23,6 +23,10 @@ $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
 <form method="POST">
 <br>
+<Span>Critério de Parada (Usuário): </Span><input type="text" id="criterioDeParada" name="criterioDeParada">
+&hArr;
+<Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="0.9"readonly>
+<br><br>
 <div id="divInputText">
 
 <?php 
@@ -51,9 +55,15 @@ n<?php echo $id; ?><input type='text' id="n<?php echo $id; ?>" name="n<?php echo
 
 <br>
 <button type="button" class="btn btn-primary" onclick="addInput();">+</button>
-<button type="submit" class="btn btn-primary">Calcular</button>
+<button type="submit" class="btn btn-primary">Salvar</button>
+<button type="button" class="btn btn-primary" onclick="calcular();">Calcular</button>
 
 </form>
+<br>
+<div id="divCalculo">
+
+</div>
+
 
 <?php
 
@@ -87,10 +97,33 @@ $statement->execute();
   <?php
 }
 
-
 ?>
 
 </body>
+
+<script>
+
+function calcular() {
+
+var i = 0 * 1;
+var resultX0 = 0;
+var n0 = document.getElementById("n0").value * 1; 
+var x1 = document.getElementById("x1").value * 1;  
+var x0 = document.getElementById("x0").value * 1;  
+
+var deltaX1 = []
+
+//while(i < 0.99 /*resultX0 < 0.99*/ /* Critério System */  /* || resultX0 < criterioUsuario */) {
+//( (n0 + x1 * i -i) /  x0 )
+deltaX1.push( ( (n0 + x1 * i -i) /  x0 ) );
+
+document.getElementById("divCalculo").innerHTML =deltaX1[i];
+
+//i++;
+//}
+}
+
+</script>
 
 <script>
 
