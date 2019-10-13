@@ -15,7 +15,7 @@
 
 <?php
 #https://www.easycalculation.com/algebra/gauss-seidel-method.php
-include 'sqlsrv.php';
+include 'conectar.php';
 $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 ?>
 
@@ -31,30 +31,20 @@ $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
 <?php 
 #$qsinputs = "SELECT * FROM md.inputs ORDER BY x DESC, y DESC, z DESC;";
-$qsinputs = "SELECT * FROM inputs ORDER BY id ASC;";
+$qsinputs = "SELECT * FROM md.inputs ORDER BY id ASC;";
 $query = $pdo->prepare($qsinputs);
 $query->execute();
-  for($i=1; $escrever = $query->fetch(); $i++){
+  for($i=0; $escrever = $query->fetch(); $i++){
   
 $id = $escrever['id'];
 ?>
-a<?php echo $id.'1'; ?><input type='text' id="a<?php echo $id.'1'; ?>" name="a<?php echo $id.'1'; ?>" value="<?php echo number_format($escrever['x1'], 15, '.', ','); ?>">
-a<?php echo $id.'2'; ?><input type='text' id="a<?php echo $id.'2'; ?>" name="a<?php echo $id.'2'; ?>" value="<?php echo number_format($escrever['x2'], 15, '.', ','); ?>">
-a<?php echo $id.'3'; ?><input type='text' id="a<?php echo $id.'3'; ?>" name="a<?php echo $id.'3'; ?>" value="<?php echo number_format($escrever['x3'], 15, '.', ','); ?>"> 
-b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?php echo $id; ?>"     value="<?php echo number_format($escrever['b'], 15, '.', ','); ?>"> 
+x<?php echo $id; ?><input type='text' id="x<?php echo $id; ?>" name="x<?php echo $id; ?>" value="<?php echo $escrever['x']; ?>">
+y<?php echo $id; ?><input type='text' id="y<?php echo $id; ?>" name="y<?php echo $id; ?>" value="<?php echo $escrever['y']; ?>">
+z<?php echo $id; ?><input type='text' id="z<?php echo $id; ?>" name="z<?php echo $id; ?>" value="<?php echo $escrever['z']; ?>"> 
+n<?php echo $id; ?><input type='text' id="n<?php echo $id; ?>" name="n<?php echo $id; ?>" value="<?php echo $escrever['n']; ?>"> 
 <button type="button" class="btn btn-danger" onclick="subInput(<?php echo $id; ?>);">-</button><br>
 <?php
   }
-  if($id == '') { 
-    $insert = "INSERT INTO inputs (id, x1, x2, x3, b) VALUES (1, 0.0, 0.0, 0.0, 0.0);"; echo"<br>";  # isnull $x0 = 0;
-    $statement = $pdo->prepare($insert);
-    $statement->execute();
-    ?>
-    <script>
-      window.location.replace('http://localhost/recursaomd/');
-    </script>
-      <?php
-    } 
 ?>
 </div>
 <input type="hidden" id="controle" name="controle" value="<?php echo $id; ?>"><br>
@@ -72,20 +62,23 @@ b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?
 
 
 <?php
-if(!empty($post['a11']) /*&& !empty($post['x1']) && !empty($post['y1'])*/) {
-$statement = $pdo->prepare("TRUNCATE TABLE inputs;");
+if(!empty($post['x0']) && !empty($post['y0']) /*&& !empty($post['x1']) && !empty($post['y1'])*/) {
+$statement = $pdo->prepare("TRUNCATE TABLE md.inputs;");
 $statement->execute();
-$qtdTOtal = $post["controle"];
-for($i=1;$i<($qtdTOtal+1);$i++) {
-  $a1 = $post["a$i"."1"];
-  $a2 = $post["a$i"."2"];
-  $a3 = $post["a$i"."3"];
-  $b =   $post["b$i"];
-if(!empty($a1)) {  
-  $insert = "INSERT INTO inputs (id, x1, x2, x3, b) VALUES ($i, $a1, $a2, $a3, $b);"; echo"<br>";  # isnull $x0 = 0;
-  $statement = $pdo->prepare($insert);
-  $statement->execute();
-} 
+#Em breve, update pela coluna ID se não tiver valores;
+for($i=0;$i<100;$i++) {
+  if(!empty($post["x$i"])) { $qtdTOtal = $i; }
+}
+for($i=0;$i<($qtdTOtal+1);$i++) {
+  $x = $post["x$i"];
+  $y = $post["y$i"];
+  $z = $post["z$i"];
+  $n = $post["n$i"];
+if(!empty($x)) {  
+$insert = "INSERT INTO md.inputs (id, x, y, z, n) VALUES ('$i', '$x', '$y', '$z', '$n');";  # isnull $x0 = 0;
+$statement = $pdo->prepare($insert);
+$statement->execute();
+}
 }
   ?>
 <script>
@@ -155,23 +148,23 @@ function addInput() {
   var val = 0;
   var inputText = "";
   val = document.getElementById('controle').value * 1 + 1 ;
-for(i=1; i < val; i++) {
-var valorX = document.getElementById('a'+i+"1").value;
-var valorY = document.getElementById('a'+i+"2").value;
-var valorZ = document.getElementById('a'+i+"3").value;
-var valorN = document.getElementById('b'+i).value;
+for(i=0; i < val; i++) {
+var valorX = document.getElementById('x'+i).value;
+var valorY = document.getElementById('y'+i).value;
+var valorZ = document.getElementById('z'+i).value;
+var valorN = document.getElementById('n'+i).value;
   inputText  =  inputText + 
-  " a"+i+"1<input type='text' id='a"+i+"1' name='a"+i+"1' value='"+valorX+"'>"+ 
-  " a"+i+"2<input type='text' id='a"+i+"2' name='a"+i+"2' value='"+valorY+"'>" + 
-  " a"+i+"3<input type='text' id='a"+i+"3' name='a"+i+"3' value='"+valorZ+"'>" + 
-  " b"+i+"<input type='text'  id='b"+i+"'  name='b"+i+"'  value='"+valorN+"'>" + 
+  " x" +i+"<input type='text' id='x"+i+"' name='x"+i+"' value='"+valorX+"'>"+ 
+  " y"+i+"<input type='text' id='y"+i+"' name='y"+i+"' value='"+valorY+"'>" + 
+  " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+valorZ+"'>" + 
+  " n"+i+"<input type='text' id='n"+i+"' name='n"+i+"' value='"+valorN+"'>" + 
   " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
 }
 inputText  =  inputText + 
-  " a"+i+"1<input type='text' id='a"+i+"1' name='a"+i+"1' value='"+"0.0"+"'>"+ 
-  " a"+i+"2<input type='text' id='a"+i+"2' name='a"+i+"2' value='"+"0.0"+"'>" + 
-  " a"+i+"3<input type='text' id='a"+i+"3' name='a"+i+"3' value='"+"0.0"+"'>" +  
-  " b"+i+"<input type='text'  id='b"+i+"'  name='b"+i+"'  value='"+"0.0"+"'>" +  
+  " x" +i+ "<input type='text' id='x"+i+"' name='x"+i+"' value='"+"0.0"+"'>"+ 
+  " y"+i+"<input type='text' id='y"+i+"' name='y"+i+"' value='"+"0.0"+"'>" + 
+  " z"+i+"<input type='text' id='z"+i+"' name='z"+i+"' value='"+"0.0"+"'>" +  
+  " n"+i+"<input type='text' id='n"+i+"' name='n"+i+"' value='"+"0.0"+"'>" +  
   " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
 document.getElementById("divInputText").innerHTML = inputText;
 document.getElementById('controle').value = val;  
@@ -186,18 +179,18 @@ function subInput(posicao) {
   var inputText = "";
   val = document.getElementById('controle').value * 1 + 1 ;
 id = 0;
-for(i=1; i < (val ); i++) {
-var valorX = document.getElementById('a'+i+"1").value;
-var valorY = document.getElementById('a'+i+"2").value;
-var valorZ = document.getElementById('a'+i+"3").value;
-var valorN = document.getElementById('b'+i).value;
+for(i=0; i < (val ); i++) {
+var valorX = document.getElementById('x'+i).value;
+var valorY = document.getElementById('y'+i).value;
+var valorZ = document.getElementById('z'+i).value;
+var valorN = document.getElementById('n'+i).value;
   if(i != posicao) {
     inputText  =  inputText + 
-  " a"+i+"1<input type='text' id='a"+i+"1' name='a"+i+"1' value='"+valorX+"'>"+ 
-  " a"+i+"2<input type='text' id='a"+i+"2' name='a"+i+"2' value='"+valorY+"'>" + 
-  " a"+i+"3<input type='text' id='a"+i+"3' name='a"+i+"3' value='"+valorZ+"'>" + 
-  " b"+i+"<input type='text'  id='b"+i+"'  name='b"+i+"'  value='"+valorN+"'>" + 
-  " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
+    " x" +id+ "<input type='text' id='x"+id+"' name='x"+id+"' value='"+valorX+"'>"+ 
+    " y"+id+"<input type='text' id='y"+id+"' name='y"+id+"' value='"+valorY+"'>" + 
+    " z"+id+"<input type='text' id='z"+id+"' name='z"+id+"' value='"+valorZ+"'>" + 
+    " n"+id+"<input type='text' id='n"+id+"' name='n"+id+"' value='"+valorN+"'>" + 
+    " <button type='button' class='btn btn-danger' onclick='subInput("+i+");'>-</button>" +"<br>";
     id++;
   }
 }
