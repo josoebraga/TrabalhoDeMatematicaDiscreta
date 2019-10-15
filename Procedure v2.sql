@@ -1,7 +1,9 @@
+DROP TABLE IF EXISTS ##inputs;
 DROP TABLE IF EXISTS ##tmpValores;
 DROP TABLE IF EXISTS ##tmpValorX;
 DROP TABLE IF EXISTS ##tmpValorXRealativo;
 DROP TABLE IF EXISTS ##tmpValorXAbsoluto;
+DROP TABLE IF EXISTS ##maxb;
 
 declare @i as int; set @i = 0;
 declare @qtd as int;
@@ -26,8 +28,34 @@ declare @x3Relativo as float(53);
 declare @x1Max as float(53);	
 declare @x2Max as float(53);
 declare @x3Max as float(53);
+declare @bs1 as float(53); declare @bs2 as float(53); declare @bs3 as float(53); declare @maxs as float(53);
 
-SELECT * into ##tmpValores FROM inputs i (nolock);
+/* Sassenfeld */
+
+SELECT @a11 = x1, @a12 = x2, @a13 = x3, @b1 = b FROM inputs i (nolock) where id = 1;
+SELECT @a21 = x1, @a22 = x2, @a23 = x3, @b2 = b FROM inputs i (nolock) where id = 2;
+SELECT @a31 = x1, @a32 = x2, @a33 = x3, @b3 = b FROM inputs i (nolock) where id = 3;
+
+select @bs1 = (@a12 + @a13) / @a11;
+select @bs2 = (1/@a22) * ((@a21 * @bs1) + @a23)  ;
+select @bs3 = 1/@a33 * (@a31 * @bs1 + @a32 * @bs2);
+
+select max(b) maxb into ##maxb from (select case when @bs1 < 0 then @bs1*-1 else @bs1 end b union select case when @bs2 < 0 then @bs2*-1 else @bs2 end union select case when @bs3 < 0 then @bs3*-1 else @bs3 end) b order by 1 desc;
+select @maxs = maxb from ##maxb;
+--select @maxs
+
+/* Reordena */
+
+SELECT *, ROW_NUMBER() OVER(Order by i.x1 desc, i.x2 desc, i.x3 desc) idNovo 
+into ##inputs
+FROM inputs i (nolock) 
+Order by x1 desc, x2 desc, x3 desc;
+
+update inputs set id = idNovo
+from inputs i (nolock) 
+join ##inputs n (nolock) on i.id = n.id;
+
+SELECT * into ##tmpValores FROM inputs i (nolock) Order by x1 desc, x2 desc, x3 desc;
 SELECT * into ##tmpValorX FROM inputs i (nolock);
 SELECT * into ##tmpValorXRealativo FROM inputs i (nolock);
 SELECT * into ##tmpValorXAbsoluto FROM inputs i (nolock);
@@ -38,13 +66,13 @@ truncate table ##tmpValores; truncate table ##tmpValorX; truncate table ##tmpVal
 
 SELECT @qtd = count(*) FROM inputs i (nolock);
 
+if @maxs < 1 /* Critério de Sassenfeld */
+begin
 /* K = 0 */
 
 insert into ##tmpValores (id, x1, x2, x3, b) values (0, 0, 0, 0, 0);
 
 /* K = 1 */
-
-
 
 while ((select top 1 x1 from ##tmpValores order by id desc) <= 1 )
 BEGIN
@@ -81,6 +109,16 @@ insert into ##tmpValores (id, x1, x2, x3, b) values (@i, @x1, @x2, @x3, 0);
 insert into ##tmpValorXAbsoluto (id, x1, x2, x3, b) values (@i, @x1Max, @x2Max, @x3Max, 0);
 --select @i = 1 + @i
 END
+end
+
+/* Devolve o ID a posição original */
+
+update inputs set id = n.idNovo
+from inputs i (nolock) 
+join ##inputs n (nolock) on i.id = n.id;
+
+
 
 select x1, x2, x3 from ##tmpValores;
 --select x1, x2, x3 from ##tmpValorXAbsoluto;
+
