@@ -95,7 +95,7 @@ Bom trabalho
 	/* Tem que decompor eem LU */
 
 
-	/* Reordena */
+	/* Início: Reordena */
 
 	SELECT *, ROW_NUMBER() OVER(Order by i.x1 desc, i.x2 desc, i.x3 desc) idNovo 
 	into ##inputs
@@ -105,6 +105,8 @@ Bom trabalho
 update inputs set id = idNovo
 from inputs i (nolock) 
 join ##inputs n (nolock) on i.id = n.id;
+
+	/* Fim: Reordena */
 
 SELECT * into ##tmpValores FROM inputs i (nolock) Order by x1 desc, x2 desc, x3 desc;
 SELECT * into ##tmpValorX FROM inputs i (nolock);
@@ -117,6 +119,10 @@ truncate table ##tmpValores; truncate table ##tmpValorX; truncate table ##tmpVal
 
 SELECT @qtd = count(*) FROM inputs i (nolock);
 
+set @x1Max = 1;  set @x1Relativo = 1;
+set @x2Max = 1;  set @x2Relativo = 1;
+set @x2Max = 1;  set @x2Relativo = 1;
+
 if @maxs < 1 /* Critério de Sassenfeld */
 begin
 /* K = 0 */
@@ -125,7 +131,29 @@ insert into ##tmpValores (id, x1, x2, x3, b) values (0, 0, 0, 0, 0);
 
 /* K = 1 */
 
-while ((select top 1 x2 from ##tmpValores order by id desc) <= 1 /* and (select top 1 x2 from ##tmpValores order by id desc) <= 1 and (select top 1 x3 from ##tmpValores order by id desc) <= 1 */)
+--while ((select top 1 x1 from ##tmpValores order by id desc) <= 1 or (select top 1 x2 from ##tmpValores order by id desc) <= 1 /* and (select top 1 x3 from ##tmpValores order by id desc) <= 1*/)
+while (
+
+(select 
+round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
+from inputs i (nolock)
+where id = 1) = @b1 and
+(select 
+round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
+from inputs i (nolock)
+where id = 2) = @b2 and
+(select 
+round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
+from inputs i (nolock)
+where id = 3) = @b3 and
+
+(select top 1 x1 from ##tmpValores order by id desc) <= 1 or @x1Max >= @x1Relativo or @x2Max >= @x2Relativo or @x3Max >= @x3Relativo)
 BEGIN
 select @i = 1 + @i;
 
@@ -147,17 +175,24 @@ select @x2 = ( @b2 - @a21 * @x1 - @a23 * @x3KMenos1 ) / @a22
 
 select @x3 = ( @b3 - @a31 * @x1 - @a32 * @x2 ) / @a33
 
-/* X Máx */
+/* X Absoluto */
 
 set @x1Max = @x1 - @x1KMenos1;
 set @x2Max = @x2 - @x2KMenos1;
 set @x3Max = @x3 - @x3KMenos1;
 
+/* X Relativo */
+
+set @x1Relativo = (@x1 - @x1KMenos1) / @x1;
+set @x2Relativo = (@x2 - @x2KMenos1) / @x2;
+set @x3Relativo = (@x3 - @x3KMenos1) / @x3;
+
 --select @i = 1 + @i
 
 insert into ##tmpValores (id, x1, x2, x3, b) values (@i, @x1, @x2, @x3, 0);
-
 insert into ##tmpValorXAbsoluto (id, x1, x2, x3, b) values (@i, @x1Max, @x2Max, @x3Max, 0);
+insert into ##tmpValorXRealativo (id, x1, x2, x3, b) values (@i, @x1Relativo, @x2Relativo, @x3Relativo, 0);
+
 --select @i = 1 + @i
 END
 end
@@ -169,7 +204,28 @@ from inputs i (nolock)
 join ##inputs n (nolock) on i.id = n.id;
 
 
+/*
+select 
+round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
+from inputs i (nolock)
+where id = 1;
+select 
+round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
+from inputs i (nolock)
+where id = 2;
+select 
+round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
+round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
+from inputs i (nolock)
+where id = 3;
+*/
 
 select x1, x2, x3 from ##tmpValores;
 select x1, x2, x3 from ##tmpValorXAbsoluto;
+select x1, x2, x3 from ##tmpValorXRealativo;
 
