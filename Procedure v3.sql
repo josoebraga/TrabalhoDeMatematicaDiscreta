@@ -69,6 +69,8 @@ Bom trabalho
 	declare @x2Max as float(53);
 	declare @x3Max as float(53);
 	declare @bs1 as float(53); declare @bs2 as float(53); declare @bs3 as float(53); declare @maxs as float(53);
+	declare @maxLinhas1 as float(53); declare @linhasSoma1 as float(53); declare @maxLinhas2 as float(53); declare @linhasSoma2 as float(53); declare @maxLinhas3 as float(53); declare @linhasSoma3 as float(53); 
+	declare @criterioLinhasMax as float(53); declare @criterioLinhas1 as float(53); declare @criterioLinhas2 as float(53); declare @criterioLinhas3 as float(53);
 	declare @determinante as float(53); declare @det1 as float(53);	declare @det2 as float(53);
 
 	/* Sassenfeld */
@@ -84,6 +86,24 @@ Bom trabalho
 	select max(b) maxb into ##maxb from (select case when @bs1 < 0 then @bs1*-1 else @bs1 end b union select case when @bs2 < 0 then @bs2*-1 else @bs2 end union select case when @bs3 < 0 then @bs3*-1 else @bs3 end) b order by 1 desc;
 	select @maxs = maxb from ##maxb;
 
+	/* Critério das linhas */ --@maxLinhas1; @linhasSoma1;
+
+	--Os 2 menores / maior
+
+	select @maxLinhas1 = max(a) from (select @a11 a union select @a12 a union select @a13 a) dt
+	select @linhasSoma1 = sum(a) from (select @a11 a union select @a12 a union select @a13 a) dt where dt.a != @maxLinhas1
+	select @criterioLinhas1 = @linhasSoma1 / @maxLinhas1;
+
+	select @maxLinhas2 = max(a) from (select @a21 a union select @a22 a union select @a23 a) dt
+	select @linhasSoma2 = sum(a) from (select @a21 a union select @a22 a union select @a23 a) dt where dt.a != @maxLinhas2
+	select @criterioLinhas2 = @linhasSoma2 / @maxLinhas2;
+
+	select @maxLinhas3 = max(a) from (select @a31 a union select @a32 a union select @a33 a) dt
+	select @linhasSoma3 = sum(a) from (select @a31 a union select @a32 a union select @a33 a) dt where dt.a != @maxLinhas3
+	select @criterioLinhas3 = @linhasSoma3 / @maxLinhas3;
+
+	select @criterioLinhasMax = max(a) from (select @criterioLinhas1 a union select @criterioLinhas2 union select @criterioLinhas3) dt;
+	
 	/* Determinante */
 
 	select @det1 = ( (@a11*@a22*@a33) + (@a12*@a23*@a31) + (@a13*@a21*@a32) );
@@ -123,7 +143,7 @@ set @x1Max = 1;  set @x1Relativo = 1;
 set @x2Max = 1;  set @x2Relativo = 1;
 set @x2Max = 1;  set @x2Relativo = 1;
 
-if @maxs < 1 /* Critério de Sassenfeld */
+if @maxs < 1 /* Critério de Sassenfeld */ or @criterioLinhasMax < 1 /* Critério das Linhas */
 begin
 /* K = 0 */
 
