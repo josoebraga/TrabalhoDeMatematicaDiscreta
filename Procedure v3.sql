@@ -10,9 +10,7 @@ Após será feita uma avaliação de 2 pontos sobre o assunto.
 Apresente algoritmo ou programa implementável em um sistema computacional que seja capaz de solucionar
 sistemas lineares com pelo menos 3 variáveis (sistemas com o número de variáveis customizável são bem
 aceitos), através dos métodos interativos Gauss-Jacobi ou Gauss-Seidel.
-* Considerando que o sistema pode receber qualquer sistema linear podendo este ter uma solução,
-infinitas soluções ou nenhuma solução, o mesmo deve informar a única solução ou que o sistema linear
-tem infinitas soluções ou nenhuma (recomendável o teste pelo determinante);
+* Considerando que o sistema pode receber qualque 
 * Alguns sistemas lineares, apesar de terem solução, não podem ser solucionados pelos métodos
 interativos, estude e implemente os critérios de Linhas ou Sassenfeld para verificar se o sistema tem
 solução;
@@ -72,6 +70,9 @@ Bom trabalho
 	declare @maxLinhas1 as float(53); declare @linhasSoma1 as float(53); declare @maxLinhas2 as float(53); declare @linhasSoma2 as float(53); declare @maxLinhas3 as float(53); declare @linhasSoma3 as float(53); 
 	declare @criterioLinhasMax as float(53); declare @criterioLinhas1 as float(53); declare @criterioLinhas2 as float(53); declare @criterioLinhas3 as float(53);
 	declare @determinante as float(53); declare @det1 as float(53);	declare @det2 as float(53);
+	declare @determinanteX as float(53); declare @detx1 as float(53);	declare @detx2 as float(53);
+	declare @determinanteY as float(53); declare @detY1 as float(53);	declare @detY2 as float(53);
+	declare @determinanteZ as float(53); declare @detZ1 as float(53);	declare @detZ2 as float(53);
 
 	/* Sassenfeld */
 
@@ -109,6 +110,35 @@ Bom trabalho
 	select @det1 = ( (@a11*@a22*@a33) + (@a12*@a23*@a31) + (@a13*@a21*@a32) );
 	select @det2 = ( (@a13*@a22*@a31) + (@a32*@a23*@a11) + (@a33*@a21*@a12) );
 	select @determinante = (@det1 - @det2)
+
+	/* Determinante X */
+
+	select @detX1 = ( (@b1*@a22*@a33) + (@a12*@a23*@b3) + (@a13*@b2*@a32) );
+	select @detX2 = ( (@a13*@a22*@b3) + (@a32*@a23*@b1) + (@a33*@b2*@a12) );
+	select @determinanteX = (@detX1 - @detX2)
+
+	/* Determinante Y */
+
+	select @detY1 = ( (@a11*@b2*@a33) + (@b1*@a23*@a31) + (@a13*@a21*@b3) );
+	select @detY2 = ( (@a13*@b2*@a31) + (@b3*@a23*@a11) + (@a33*@a21*@b1) );
+	select @determinanteY = (@detY1 - @detY2)
+
+	/* Determinante Z */
+
+	select @detZ1 = ( (@a11*@a22*@b3) + (@a12*@b2*@a31) + (@b1*@a21*@a32) );
+	select @detZ2 = ( (@b1*@a22*@a31) + (@a32*@b2*@a11) + (@b3*@a21*@a12) );
+	select @determinanteZ = (@detZ1 - @detZ2)
+
+select @determinante det, @determinanteX detX, @determinanteY detY, @determinanteZ detZ
+
+/*
+
+SPD-> detA <> 0 (1 solução)
+SPI-> detA = 0, detAX=detAY=detAZ=...detAn=0 (Infinitas soluções)
+SI-> detA = 0, se pelo menos um detAX, detAY, detAZ ...detAn for <> 0 (Não tem solução)
+
+
+*/
 
 	--select @maxs
 
@@ -159,19 +189,19 @@ round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) fr
 round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
 round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
 from inputs i (nolock)
-where id = 1) = @b1 and
+where id = 1) != @b1 and
 (select 
 round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
 round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
 round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
 from inputs i (nolock)
-where id = 2) = @b2 and
+where id = 2) != @b2 and
 (select 
 round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
 round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
 round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
 from inputs i (nolock)
-where id = 3) = @b3 and
+where id = 3) != @b3 and
 
 (select top 1 x1 from ##tmpValores order by id desc) <= 1 or @x1Max >= @x1Relativo or @x2Max >= @x2Relativo or @x3Max >= @x3Relativo)
 BEGIN
@@ -245,7 +275,7 @@ from inputs i (nolock)
 where id = 3;
 */
 
-select x1, x2, x3 from ##tmpValores;
-select x1, x2, x3 from ##tmpValorXAbsoluto;
-select x1, x2, x3 from ##tmpValorXRealativo;
+--select x1, x2, x3 from ##tmpValores;
+--select x1, x2, x3 from ##tmpValorXAbsoluto;
+--select x1, x2, x3 from ##tmpValorXRealativo;
 
