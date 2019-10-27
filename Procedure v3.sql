@@ -128,18 +128,18 @@ Bom trabalho
 	select @detZ1 = ( (@a11*@a22*@b3) + (@a12*@b2*@a31) + (@b1*@a21*@a32) );
 	select @detZ2 = ( (@b1*@a22*@a31) + (@a32*@b2*@a11) + (@b3*@a21*@a12) );
 	select @determinanteZ = (@detZ1 - @detZ2)
-
-select @determinante det, @determinanteX detX, @determinanteY detY, @determinanteZ detZ
-
 /*
-
 SPD-> detA <> 0 (1 solução)
 SPI-> detA = 0, detAX=detAY=detAZ=...detAn=0 (Infinitas soluções)
 SI-> detA = 0, se pelo menos um detAX, detAY, detAZ ...detAn for <> 0 (Não tem solução)
-
-
 */
 
+select @determinante det, @determinanteX detX, @determinanteY detY, @determinanteZ detZ,
+case 
+	when @determinante != 0 then 'SPD: 1 solução'
+	when @determinante = 0 and @determinanteX = 0  and @determinanteY = 0  and @determinanteZ = 0 then 'SPI: Infinitas soluções'
+	when @determinante = 0 and (@determinanteX + @determinanteY + @determinanteZ) != 0 then 'SI: não tem solução'
+end discussaoDoSistema
 	--select @maxs
 
 	/* Tem que decompor eem LU */
@@ -275,7 +275,7 @@ from inputs i (nolock)
 where id = 3;
 */
 
---select x1, x2, x3 from ##tmpValores;
---select x1, x2, x3 from ##tmpValorXAbsoluto;
---select x1, x2, x3 from ##tmpValorXRealativo;
+select x1, x2, x3 from ##tmpValores;
+select x1, x2, x3 from ##tmpValorXAbsoluto;
+select x1, x2, x3 from ##tmpValorXRealativo;
 
