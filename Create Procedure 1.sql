@@ -1,3 +1,21 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,Braga,Josoé Schmidt>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE sp_calcula_sistema_linear (@autorizaReordena as int)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Início
+
 /*
 Orientação
 Atividade INDIVIDUAL: Apresentar um resumo sobre o método de solução Gauss-Seidel para sistemas lineares, critérios de convergência 
@@ -82,10 +100,10 @@ Bom trabalho
 	declare @determinanteY as float(53); declare @detY1 as float(53);	declare @detY2 as float(53);
 	declare @determinanteZ as float(53); declare @detZ1 as float(53);	declare @detZ2 as float(53);
 
-	declare @autorizaReordena as int; --0 não, 1 sim
+	--declare @autorizaReordena as int; --0 não, 1 sim
 	declare @criterioParadaUsuario as float(53);
 
-	set @autorizaReordena = 1;
+	--set @autorizaReordena = 1;
 	--set @criterioParadaUsuario = 0.9
 	select @criterioParadaUsuario = valor from criterio_parada_user;
 
@@ -303,10 +321,11 @@ from inputs i (nolock)
 where id = 3;
 */
 
-select x1, x2, x3 from ##tmpValores;
-select x1, x2, x3 from ##tmpValorXAbsoluto;
-select x1, x2, x3 from ##tmpValorXRealativo;
+--select x1, x2, x3 from ##tmpValores;
+--select x1, x2, x3 from ##tmpValorXAbsoluto;
+--select x1, x2, x3 from ##tmpValorXRealativo;
 
-select distinct id, x1, x2, x3 from ##tmpValores order by id asc;
 
-exec sp_calcula_sistema_linear 1;
+
+END
+GO
