@@ -30,13 +30,13 @@ $query->execute();
 
 <form method="POST">
 <br>
-<Span>Critério de Parada (Usuário): </Span><input type="text" id="criterioDeParadaUser" name="criterioDeParadaUser" value="<?php echo $criterioDeParadaUser; ?>">
+<Span>Critério de Parada (Usuário): </Span><input type="text" id="criterioDeParadaUser" name="criterioDeParadaUser" value="<?php echo number_format($criterioDeParadaUser, 7); ?>">
 &hArr;
 <Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="x1<=1"readonly>
 <br><br>
-<Span>Arredontamento:  </Span><input type="number" id="arredontamento" name="arredontamento" value="5">
+<!-- <Span>Arredontamento:  </Span><input type="number" id="arredontamento" name="arredontamento" value="5">
 <br><br>
-<div id="divInputText">
+ --><div id="divInputText">
 
 <?php 
 #$qsinputs = "SELECT * FROM md.inputs ORDER BY x DESC, y DESC, z DESC;";
@@ -132,12 +132,58 @@ $query = $pdo->prepare($qsResultado);
 $query->execute();
 
 
-for($i=1; $escrever = $query->fetch(); $i++){
+/* for($i=1; $escrever = $query->fetch(); $i++){
     echo $escrever['x1'].'<br>';
-  }
+  } */
 
-}
 ?>
+<h4>Resultado das Iterações</h4>
+<div class="table-responsive">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Iteração</th>
+      <th scope="col">X1</th>
+      <th scope="col">X2</th>
+      <th scope="col">X3</th>
+    </tr>
+  </thead>
+  <tbody>
+<?php 
+for($i=1; $escrever = $query->fetch(); $i++) {
+  ?>    
+    <tr>
+      <th scope="row"><?php echo $i; ?></th>
+      <td><?php echo $x1 = $escrever['x1']; ?></td>
+      <td><?php echo $x2 = $escrever['x2']; ?></td>
+      <td><?php echo $x3 = $escrever['x3']; ?></td>
+    </tr>
+<?php } ?>
+  </tbody>
+</table>
+</div>
+
+
+<?php } ?>
+
+<h4>Prova...</h4>
+
+<?php  
+
+$qsinputs = "SELECT * FROM inputs ORDER BY id ASC;";
+$query = $pdo->prepare($qsinputs);
+$query->execute();
+for($i=1; $escrever = $query->fetch(); $i++){
+  
+echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.($escrever['x1']*$x1 + $escrever['x2']*$x2 + $escrever['x3']*$x3).'<br>';
+  
+}
+
+# Lembrar: Erro absoluto e relativo são em módulo?
+
+?>
+
+
 
 </body>
 
