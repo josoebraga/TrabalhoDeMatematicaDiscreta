@@ -30,9 +30,9 @@ $query->execute();
 
 <form method="POST">
 <br>
-<Span>Critério de Parada (Usuário): </Span><input type="text" id="criterioDeParadaUser" name="criterioDeParadaUser" value="<?php echo number_format($criterioDeParadaUser, 7); ?>">
+<Span>Critério de Parada (Usuário): </Span><input type="number" id="criterioDeParadaUser" name="criterioDeParadaUser" value="<?php echo $criterioDeParadaUser; ?>">
 &hArr;
-<Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="x1<=1"readonly>
+<Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="10000"readonly>
 <br><br>
 <!-- <Span>Arredontamento:  </Span><input type="number" id="arredontamento" name="arredontamento" value="5">
 <br><br>
@@ -127,6 +127,14 @@ $sp = "exec sp_calcula_sistema_linear $autorizaReordena;";
 $query = $pdo->prepare($sp);
 $query->execute();
 
+$qsDiscussaoDoSistema = "select discussaoDoSistema from ##relatórioDeterminantes;";
+$query = $pdo->prepare($qsDiscussaoDoSistema);
+$query->execute();
+for($i=1; $escrever = $query->fetch(); $i++) {
+  $discussaoDoSistema = $escrever['discussaoDoSistema'];
+}
+
+
 $qsResultado = "select distinct id, x1, x2, x3 from ##tmpValores order by id asc;";
 $query = $pdo->prepare($qsResultado);
 $query->execute();
@@ -137,6 +145,11 @@ $query->execute();
   } */
 
 ?>
+
+<div class="<?php if($discussaoDoSistema == 'SPD: 1 solução' || $discussaoDoSistema == 'SPI: Infinitas soluções') { ?>alert alert-primary<?php } else if($discussaoDoSistema == 'SI: não tem solução') { ?>alert alert-danger<?php } ?>" role="alert">
+  <?php echo $discussaoDoSistema; ?>
+</div>
+
 <h4>Resultado das Iterações</h4>
 <div class="table-responsive">
 <table class="table">

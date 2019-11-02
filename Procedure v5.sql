@@ -1,43 +1,3 @@
-/*
-Orientação
-Atividade INDIVIDUAL: Apresentar um resumo sobre o método de solução Gauss-Seidel para sistemas lineares, critérios de convergência 
-e critérios de parada. 
-Tudo com foco em ERROS COMPUTACIONAIS. O que eles podem afetar quais os cuidados na programação de algorítmos matemáticos recursivos.
-Opção de apresentar um programa que solucione sistemas lineares (INDIVIDUAL OU EM DUPLA) pelo método de Gauss-Seidel. 
-Especificação em anexo. 
-Após será feita uma avaliação de 2 pontos sobre o assunto.
-
-Apresente algoritmo ou programa implementável em um sistema computacional que seja capaz de solucionar
-sistemas lineares com pelo menos 3 variáveis (sistemas com o número de variáveis customizável são bem
-aceitos), através dos métodos interativos Gauss-Jacobi ou Gauss-Seidel.
-* Considerando que o sistema pode receber qualquer sistema linear podendo este ter uma solução,
-infinitas soluções ou nenhuma solução, o mesmo deve informar a única solução ou que o sistema linear
-tem infinitas soluções ou nenhuma (recomendável o teste pelo determinante);
-* Alguns sistemas lineares, apesar de terem solução, não podem ser solucionados pelos métodos
-interativos, estude e implemente os critérios de Linhas ou Sassenfeld para verificar se o sistema tem
-solução;
-* Se possível implemente o pivotamento de Gauss para alterar o sistema linear para que os critérios de
-Linha ou Sassenfeld sejam atendido, caso os mesmos não possam ser atendidos, o sistema deve
-informar que tem solução mas não pode ser realizado pelos métodos interativos
-* Caso não seja possível implementar o pivotamento de Gauss, o sistema deve recomendar ao usuário
-a alimentação do sistema linear trocando as linhas;
-* Por ser um sistema de apoio didático o mesmo deve apresentar o máximo de informação sobre as
-variáveis de decisão utilizadas pelo sistema, como por exemplo o determinante da matriz, os critério
-de Linha ou Sassenfeld, o número de interações, o valores de convergência, etc;
-* Por estar utilizando de um método interativo, informe quais são os critérios de parada utilizados no
-relatório explicativo;
-* Se possível coloque um botão passo a passo e um botão para solução direta;
-* Apresente relatório explicativo dos problemas encontrados para a implementação, o custo
-computacional das rotinas e do sistema em um todo;
-* Como o sistema pode parar antes dos valores corretos serem determinados, deve ser apresentado alguns
-testes e o cálculo do erro computacional absoluto e relativo e com base nesses um parecer sobre a
-capacidade e confiabilidade do seu sistema.
-
-Bom trabalho
-*/
-
-
-
 	DROP TABLE IF EXISTS ##inputs;
 	DROP TABLE IF EXISTS ##tmpValores;
 	DROP TABLE IF EXISTS ##tmpValorX;
@@ -195,32 +155,31 @@ set @x1Max = 1;  set @x1Relativo = 1;
 set @x2Max = 1;  set @x2Relativo = 1;
 set @x2Max = 1;  set @x2Relativo = 1;
 
+--update ##relatórioDeterminantes set discussaoDoSistema = 'SI: não tem solução' 
+--set @maxs = 12;
+
 if(select discussaoDoSistema from ##relatórioDeterminantes) != 'SI: não tem solução' /* Sugere Reordenar */
-
-begin
-
 if @maxs < 1 /* Critério de Sassenfeld */ or @criterioLinhasMax < 1 /* Critério das Linhas */
-begin
-/* K = 0 */
 
 insert into ##tmpValores (id, x1, x2, x3, b) values (0, 0, 0, 0, 0);
 
-set @b1TesteParada = 1;
-set @b2TesteParada = 1;
-set @b3TesteParada = 1;
+set @b1TesteParada = 100000;
+set @b2TesteParada = 100000;
+set @b3TesteParada = 100000;
 
-
-/* K = 1 */
-
---while ((select top 1 x1 from ##tmpValores order by id desc) <= 1 or (select top 1 x2 from ##tmpValores order by id desc) <= 1 /* and (select top 1 x3 from ##tmpValores order by id desc) <= 1*/)
 while (
-@b1TesteParada != 1 and --@b1 and
-@b2TesteParada != 1 and --@b2 and
-@b3TesteParada != 1 --@b3 --and
+@b1TesteParada < @b1 and 
+@b2TesteParada < @b2 and 
+@b3TesteParada < @b3 
+or @i <= @criterioParadaUsuario 
+or @i <= 1000
 )
 BEGIN
-
+--select * from ##tmpValores
 select @i = 1 + @i;
+
+--select @i
+--if ( @i = 10 )  break;
 
 SELECT @x1KMenos1 = x1, @x2KMenos1 = x2, @x3KMenos1 = x3, @b1 = b FROM ##tmpValores (nolock) where id = @i - 1; --
 --SELECT @x1KMenos1, @x2KMenos1, @x3KMenos1
@@ -258,8 +217,6 @@ insert into ##tmpValores (id, x1, x2, x3, b) values (@i, @x1, @x2, @x3, 0);
 insert into ##tmpValorXAbsoluto (id, x1, x2, x3, b) values (@i, @x1Max, @x2Max, @x3Max, 0);
 insert into ##tmpValorXRealativo (id, x1, x2, x3, b) values (@i, @x1Relativo, @x2Relativo, @x3Relativo, 0);
 
---select x1 from ##tmpValores where id < 2000 and x1 = (select x1 from ##tmpValores where id = (@id - 1))
-
    IF EXISTS (
 	select * from (
 		select count(*) qtd from (
@@ -274,16 +231,9 @@ insert into ##tmpValorXRealativo (id, x1, x2, x3, b) values (@i, @x1Relativo, @x
       BREAK;
    END
 
-/*
-if (
-	(select x1 from ##tmpValores where id = @i) = (select x1 from ##tmpValores where id = @i) and
-	(select x2 from ##tmpValores where id = @i) = (select x2 from ##tmpValores where id = @i) and
-	(select x3 from ##tmpValores where id = @i) = (select x3 from ##tmpValores where id = @i) 
-) break;
-*/
 ------------------------------------------------------------------------------------------------------------------
 
-/*
+
 select top 1 
 @idTesteParada = id,
 @b1TesteParada = round(
@@ -306,7 +256,7 @@ select top 1
 ),4)
 from ##tmpValores v
 Order by id desc
-*/
+
 
 ------------------------------------------------------------------------------------------------------------------
 /*
@@ -317,8 +267,7 @@ END
 */
 --select @i = 1 + @i
 END
-end
-end
+
 
 /* Devolve o ID a posição original */
 	if(@autorizaReordena) = 1
@@ -327,36 +276,11 @@ end
 		from inputs i (nolock) 
 		join ##inputs n (nolock) on i.id = n.id;
 	end
-/*
-select 
-round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
-round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
-round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
-from inputs i (nolock)
-where id = 1;
-select 
-round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
-round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
-round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
-from inputs i (nolock)
-where id = 2;
-select 
-round(x1 * (select x1 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
-round(x2 * (select x2 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1) + 
-round(x3 * (select x3 from ##tmpValores t (nolock) where id = (select max(id) from ##tmpValores t (nolock))),1)
-from inputs i (nolock)
-where id = 3;
-*/
-
-select @maxs maxs into ##Sassenfeld  /* Critério de Sassenfeld */ 
-
-select @criterioLinhasMax criterioLinhas into ##criterioLinhas /* Critério das Linhas */
-
---select distinct Round(x1,4) x1, Round(x2,4) x2, Round(x3,4) x3 from ##tmpValores Order by 1 asc;
---update ##tmpValores set x1 = Round(x1,4), x2 = Round(x2,4), x3 = Round(x3,4);
 
 
-select --top 1 *,
+---------------------------------------------------------------------
+
+select top 1 *,
 round(
 (
 (x1 * (select x1 from ##inputs i where id = 1)) +
@@ -376,31 +300,9 @@ round(
 (x3 * (select x3 from ##inputs i where id = 3))
 ),4) b3
 from ##tmpValores v
-where 
-(select b from ##inputs where id = 1) between (round(
-(
-(x1 * (select x1 from ##inputs i where id = 1)) +
-(x2 * (select x2 from ##inputs i where id = 1)) +
-(x3 * (select x3 from ##inputs i where id = 1))
-),1)) and (select b from ##inputs where id = 1) and
---
-(select b from ##inputs where id = 2) between (round(
-(
-(x1 * (select x1 from ##inputs i where id = 2)) +
-(x2 * (select x2 from ##inputs i where id = 2)) +
-(x3 * (select x3 from ##inputs i where id = 2))
-),1)) and (select b from ##inputs where id = 2) and
---
-(select b from ##inputs where id = 3) between (round(
-(
-(x1 * (select x1 from ##inputs i where id = 3)) +
-(x2 * (select x2 from ##inputs i where id = 3)) +
-(x3 * (select x3 from ##inputs i where id = 3))
-),1)) and (select b from ##inputs where id = 3)
---id = 1 order by id desc;
+order by id desc;
 
 
-select * from criterio_parada_user;
 --select round(x1, 4) from ##tmpValores;
 select /*top 100*/ * from ##tmpValores order by id asc;
 select x1, x2, x3 from ##tmpValorXAbsoluto;
@@ -410,3 +312,12 @@ select * from ##inputs
 select distinct id, x1, x2, x3 from ##tmpValores order by id asc;
 	select * from criterio_parada_user;
 exec sp_calcula_sistema_linear 1;
+
+	select * from (
+		select count(*) qtd from (
+				select x1 from ##tmpValores where id = 1034 and round(x1,15) = (select round(x1,15) from ##tmpValores where id = (1034 - 1)) union
+				select x2 from ##tmpValores where id = 1034 and round(x2,15) = (select round(x2,15) from ##tmpValores where id = (1034 - 1)) union
+				select x3 from ##tmpValores where id = 1034 and round(x3,15) = (select round(x3,15) from ##tmpValores where id = (1034 - 1)) 
+				) interno
+				) valida 
+	Where valida.qtd >=3
