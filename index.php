@@ -194,6 +194,11 @@ for($i=1; $escrever = $query->fetch(); $i++) {
         echo 'Determinante: '.$det.', determinante X1: '.$detX1.', determinante X2: '.$detX2.', determinante X3: '.$detX3.'.';         
   ?>
 </div>
+<?php if($valS == 'N' && $valL == 'N') { ?>
+<div class="alert alert-danger" role="alert">
+  <?php echo 'Impossível calcular o sistema, pois este não atinge os dois critérios de convergência!'; ?>
+</div>
+<?php } ?>
 <div class="<?php if($valS == 'N') { $ssa = ' não é'; ?>alert alert-danger<?php } else if($valS == 'S') { $ssa = ' é '; ?>alert alert-primary<?php } ?>" role="alert">
   <?php echo 'Critério de Sassenfeld (&Delta; deve ser menor que 1): O valor '.$criterioDeSassenfeld.$ssa.' menor que 1.'; ?>
 </div>
