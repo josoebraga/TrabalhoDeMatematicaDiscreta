@@ -196,7 +196,7 @@ for($i=1; $escrever = $query->fetch(); $i++) {
 </div>
 <?php if($valS == 'N' && $valL == 'N') { ?>
 <div class="alert alert-danger" role="alert">
-  <?php echo 'Impossível calcular o sistema, pois este não atinge os dois critérios de convergência!'; ?>
+  <?php echo 'Impossível calcular o sistema, pois este não atinge nenhum dos dois critérios de convergência!'; ?>
 </div>
 <?php } ?>
 <div class="<?php if($valS == 'N') { $ssa = ' não é'; ?>alert alert-danger<?php } else if($valS == 'S') { $ssa = ' é '; ?>alert alert-primary<?php } ?>" role="alert">
