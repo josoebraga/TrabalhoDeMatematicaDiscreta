@@ -1,7 +1,7 @@
 	DROP TABLE IF EXISTS ##inputs;
 	DROP TABLE IF EXISTS ##tmpValores;
 	DROP TABLE IF EXISTS ##tmpValorX;
-	DROP TABLE IF EXISTS ##tmpValorXRealativo;
+	DROP TABLE IF EXISTS ##tmpValorXRelativo;
 	DROP TABLE IF EXISTS ##tmpValorXAbsoluto;
 	DROP TABLE IF EXISTS ##maxb;
 	DROP TABLE IF EXISTS ##Sassenfeld;
@@ -142,10 +142,10 @@ from ##maxb
 
 SELECT * into ##tmpValores FROM inputs i (nolock) Order by x1 desc, x2 desc, x3 desc;
 SELECT * into ##tmpValorX FROM inputs i (nolock);
-SELECT * into ##tmpValorXRealativo FROM inputs i (nolock);
+SELECT * into ##tmpValorXRelativo FROM inputs i (nolock);
 SELECT * into ##tmpValorXAbsoluto FROM inputs i (nolock);
 
-truncate table ##tmpValores; truncate table ##tmpValorX; truncate table ##tmpValorXRealativo; truncate table ##tmpValorXAbsoluto;
+truncate table ##tmpValores; truncate table ##tmpValorX; truncate table ##tmpValorXRelativo; truncate table ##tmpValorXAbsoluto;
 
 --insert into ##tmpValores (id, x1, x2, x3, b) values (0, 0, 0, 0, 0);
 
@@ -215,7 +215,7 @@ set @x3Relativo = (@x3 - @x3KMenos1) / @x3;
 
 insert into ##tmpValores (id, x1, x2, x3, b) values (@i, @x1, @x2, @x3, 0);
 insert into ##tmpValorXAbsoluto (id, x1, x2, x3, b) values (@i, @x1Max, @x2Max, @x3Max, 0);
-insert into ##tmpValorXRealativo (id, x1, x2, x3, b) values (@i, @x1Relativo, @x2Relativo, @x3Relativo, 0);
+insert into ##tmpValorXRelativo (id, x1, x2, x3, b) values (@i, @x1Relativo, @x2Relativo, @x3Relativo, 0);
 
    IF EXISTS (
 	select * from (
@@ -306,7 +306,7 @@ order by id desc;
 --select round(x1, 4) from ##tmpValores;
 select /*top 100*/ * from ##tmpValores order by id asc;
 select x1, x2, x3 from ##tmpValorXAbsoluto;
-select x1, x2, x3 from ##tmpValorXRealativo;
+select x1, x2, x3 from ##tmpValorXRelativo;
 select * from ##inputs
 
 select distinct id, x1, x2, x3 from ##tmpValores order by id asc;
@@ -321,3 +321,23 @@ exec sp_calcula_sistema_linear 1;
 				) interno
 				) valida 
 	Where valida.qtd >=3
+
+select * from ##tmpValorXAbsoluto order by id asc;
+select * from ##tmpValorXRelativo order by id asc;
+
+select * from ##inputs Order by idNovo Asc;
+
+select distinct 
+	v.id, v.x1, v.x2, v.x3,
+		  isnull(a.x1,0) aX1, isnull(a.x2,0) aX2, isnull(a.x3,0) aX3,
+		  isnull(r.x1,0) rX1, isnull(r.x2,0) rX2, isnull(r.x3,0) rX3
+from ##tmpValores v
+left join ##tmpValorXAbsoluto a on a.id = v.id
+left join ##tmpValorXRelativo r on a.id = r.id
+order by v.id asc;
+
+	select cast(maxb as float)*1 maxb, case when maxb < 1 then 'S' else 'N' end valS from ##maxb;
+	select criterioLinhas, case when criterioLinhas < 1 then 'S' else 'N' end valS from ##criterioLinhas;
+	select * from ##relatórioDeterminantes;
+
+--select * into inputsBkp2 from inputs;

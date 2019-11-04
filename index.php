@@ -33,6 +33,7 @@ $query->execute();
 <Span>Critério de Parada (Usuário): </Span><input type="number" id="criterioDeParadaUser" name="criterioDeParadaUser" value="<?php echo $criterioDeParadaUser; ?>">
 &hArr;
 <Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="10000"readonly>
+&hArr; x1 &#8776;	 b1, x2 &#8776;	 b2 e x3 &#8776; b3; 
 <br><br>
 <!-- <Span>Arredontamento:  </Span><input type="number" id="arredontamento" name="arredontamento" value="5">
 <br><br>
@@ -121,36 +122,99 @@ if(!empty($criterioDeParadaUser)) {
 
 if($calcular != '') {
 
-  $autorizaReordena = 1; #Fazer aparecer um radio caso não atinja os critérios, para que o usuário possa escolher
+  $autorizaReordena = 0; #Fazer aparecer um radio caso não atinja os critérios, para que o usuário possa escolher
 
 $sp = "exec sp_calcula_sistema_linear $autorizaReordena;";
 $query = $pdo->prepare($sp);
 $query->execute();
 
-$qsDiscussaoDoSistema = "select discussaoDoSistema from ##relatórioDeterminantes;";
+$qsDiscussaoDoSistema = "select * from ##relatórioDeterminantes;";
 $query = $pdo->prepare($qsDiscussaoDoSistema);
 $query->execute();
 for($i=1; $escrever = $query->fetch(); $i++) {
+  $det = $escrever['det'];
+  $detX1 = $escrever['detX'];
+  $detX2 = $escrever['detY'];
+  $detX3 = $escrever['detZ'];
   $discussaoDoSistema = $escrever['discussaoDoSistema'];
 }
-
-
-$qsResultado = "select distinct id, x1, x2, x3 from ##tmpValores order by id asc;";
-$query = $pdo->prepare($qsResultado);
+$qsCriterioDeSassenfeld = "select cast(maxb as float)*1 maxb, case when maxb < 1 then 'S' else 'N' end valS from ##maxb;";
+$query = $pdo->prepare($qsCriterioDeSassenfeld);
 $query->execute();
-
-
-/* for($i=1; $escrever = $query->fetch(); $i++){
-    echo $escrever['x1'].'<br>';
-  } */
+for($i=1; $escrever = $query->fetch(); $i++) {
+  $criterioDeSassenfeld = $escrever['maxb'];
+  $valS = $escrever['valS'];
+}
+$qsCriterioLinhas = "select criterioLinhas, case when criterioLinhas < 1 then 'S' else 'N' end valL from ##criterioLinhas;";
+$query = $pdo->prepare($qsCriterioLinhas);
+$query->execute();
+for($i=1; $escrever = $query->fetch(); $i++) {
+  $criterioLinhas = $escrever['criterioLinhas'];
+  $valL = $escrever['valL'];
+}
 
 ?>
 
-<div class="<?php if($discussaoDoSistema == 'SPD: 1 solução' || $discussaoDoSistema == 'SPI: Infinitas soluções') { ?>alert alert-primary<?php } else if($discussaoDoSistema == 'SI: não tem solução') { ?>alert alert-danger<?php } ?>" role="alert">
-  <?php echo $discussaoDoSistema; ?>
+<?php 
+$qsSistema = "select * from ##inputs Order by idNovo Asc;";
+$query = $pdo->prepare($qsSistema);
+$query->execute();
+?>
+<h4>Esta é a ordem de linhas em que o sistema foi calculado...</h4>
+<div class="table-responsive">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">X1</th>
+      <th scope="col">X2</th>
+      <th scope="col">X3</th>
+      <th scope="col">b</th>
+    </tr>
+  </thead>
+  <tbody>
+<?php 
+for($i=1; $escrever = $query->fetch(); $i++) {
+  ?>    
+    <tr>
+      <th scope="row"><?php echo $i; ?></th>
+      <td><?php echo number_format($escrever['x1'], 15, '.', ','); ?></td>
+      <td><?php echo number_format($escrever['x2'], 15, '.', ','); ?></td>
+      <td><?php echo number_format($escrever['x3'], 15, '.', ','); ?></td>
+      <td><?php echo number_format($escrever['b'],  15, '.', ','); ?></td>
+    </tr>
+<?php } ?>
+  </tbody>
+</table>
 </div>
 
-<h4>Resultado das Iterações</h4>
+<div class="<?php if($discussaoDoSistema == 'SPD: 1 solução' || $discussaoDoSistema == 'SPI: Infinitas soluções') { ?>alert alert-primary<?php } else if($discussaoDoSistema == 'SI: não tem solução') { ?>alert alert-danger<?php } ?>" role="alert">
+  <?php 
+        echo $discussaoDoSistema.'<br>'; 
+        echo 'Determinante: '.$det.', determinante X1: '.$detX1.', determinante X2: '.$detX2.', determinante X3: '.$detX3.'.';         
+  ?>
+</div>
+<div class="<?php if($valS == 'N') { $ssa = ' não é'; ?>alert alert-danger<?php } else if($valS == 'S') { $ssa = ' é '; ?>alert alert-primary<?php } ?>" role="alert">
+  <?php echo 'Critério de Sassenfeld (&Delta; deve ser menor que 1): O valor '.$criterioDeSassenfeld.$ssa.' menor que 1.'; ?>
+</div>
+<div class="<?php if($valL == 'N') { $lla = ' não é'; ?>alert alert-danger<?php } else if($valL == 'S') { $lla = ' é '; ?>alert alert-primary<?php } ?>" role="alert">
+  <?php echo 'Critério das Linhas (&Delta; deve ser menor que 1): O valor '.$criterioLinhas.$lla.' menor que 1.'; ?>
+</div>
+<?php 
+$qsResultado = "
+select distinct 
+    v.id, v.x1, v.x2, v.x3,
+    isnull(a.x1,0) aX1, isnull(a.x2,0) aX2, isnull(a.x3,0) aX3,
+    isnull(r.x1,0) rX1, isnull(r.x2,0) rX2, isnull(r.x3,0) rX3
+from ##tmpValores v
+left join ##tmpValorXAbsoluto a on a.id = v.id
+left join ##tmpValorXRelativo r on a.id = r.id
+order by v.id asc;
+";
+$query = $pdo->prepare($qsResultado);
+$query->execute();
+?>
+<h1>Resultado das Iterações</h1>
 <div class="table-responsive">
 <table class="table">
   <thead>
@@ -167,40 +231,45 @@ for($i=1; $escrever = $query->fetch(); $i++) {
   ?>    
     <tr>
       <th scope="row"><?php echo $i; ?></th>
-      <td><?php echo $x1 = $escrever['x1']; ?></td>
-      <td><?php echo $x2 = $escrever['x2']; ?></td>
-      <td><?php echo $x3 = $escrever['x3']; ?></td>
+      <td title="<?php echo 'Erro abs.: '.$escrever['aX1'].' - Erro rel.: '.$escrever['rX1']; ?>"><?php echo $x1 = $escrever['x1']; ?></td>
+      <td title="<?php echo 'Erro abs.: '.$escrever['aX2'].' - Erro rel.: '.$escrever['rX2']; ?>"><?php echo $x2 = $escrever['x2']; ?></td>
+      <td title="<?php echo 'Erro abs.: '.$escrever['aX3'].' - Erro rel.: '.$escrever['rX3']; ?>"><?php echo $x3 = $escrever['x3']; ?></td>
     </tr>
 <?php } ?>
   </tbody>
 </table>
 </div>
 
-
-<?php } ?>
+<?php 
+  $qsinputs = "SELECT * FROM inputs ORDER BY id ASC;";
+  $query = $pdo->prepare($qsinputs);
+  $query->execute();
+ ?>
 
 <h4>Prova...</h4>
-
-<?php  
-
-$qsinputs = "SELECT * FROM inputs ORDER BY id ASC;";
-$query = $pdo->prepare($qsinputs);
-$query->execute();
+<div class="table-responsive">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Resultado</th>
+    </tr>
+  </thead>
+  <tbody>
+<?php 
 for($i=1; $escrever = $query->fetch(); $i++){
-  
-echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.($escrever['x1']*$x1 + $escrever['x2']*$x2 + $escrever['x3']*$x3).'<br>';
-  
-}
-
-# Lembrar: Erro absoluto e relativo são em módulo?
-
-?>
-
-
-
+  ?>    
+    <tr>
+      <th scope="row"><?php echo $i; ?></th>
+      <td><?php echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.($escrever['x1']*$x1 + $escrever['x2']*$x2 + $escrever['x3']*$x3); ?></td>
+    </tr>
+<?php } ?>
+  </tbody>
+</table>
+</div>
+<?php } ?>
+<br>
 </body>
-
-
 
 <script>
 function addInput() {
