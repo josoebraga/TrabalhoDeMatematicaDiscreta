@@ -38,7 +38,6 @@ $query->execute();
 <!-- <Span>Arredontamento:  </Span><input type="number" id="arredontamento" name="arredontamento" value="5">
 <br><br>
  --><div id="divInputText">
-
 <?php 
 #$qsinputs = "SELECT * FROM md.inputs ORDER BY x DESC, y DESC, z DESC;";
 $qsinputs = "SELECT * FROM inputs ORDER BY id ASC;";
@@ -71,6 +70,8 @@ b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?
 
 <br>
 <button type="button" class="btn btn-primary" onclick="addInput();">+</button>
+<span>Reordenar</span>
+<input type="checkbox" id="reordena" name="reordena" value="1" onchange="mudaValorCheck(this.value, 'reordena');" checked>
 <button type="submit" class="btn btn-primary">Salvar</button>
 <button type="submit" id="calcular" name="calcular" class="btn btn-primary" value="calcular">Calcular</button>
 
@@ -122,11 +123,12 @@ if(!empty($criterioDeParadaUser)) {
 
 if($calcular != '') {
 
-  $autorizaReordena = 0; #Fazer aparecer um radio caso não atinja os critérios, para que o usuário possa escolher
-
-$sp = "exec sp_calcula_sistema_linear $autorizaReordena;";
-$query = $pdo->prepare($sp);
-$query->execute();
+  #$autorizaReordena = 1; #Fazer aparecer um radio caso não atinja os critérios, para que o usuário possa escolher
+  @$autorizaReordena = $post['reordena'];
+  ($autorizaReordena != 1) ? $autorizaReordena = 0 : '';
+  echo $sp = "exec sp_calcula_sistema_linear $autorizaReordena;";
+  $query = $pdo->prepare($sp);
+  $query->execute();
 
 $qsDiscussaoDoSistema = "select * from ##relatórioDeterminantes;";
 $query = $pdo->prepare($qsDiscussaoDoSistema);
@@ -266,7 +268,12 @@ for($i=1; $escrever = $query->fetch(); $i++){
   ?>    
     <tr>
       <th scope="row"><?php echo $i; ?></th>
-      <td><?php echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.($escrever['x1']*$x1 + $escrever['x2']*$x2 + $escrever['x3']*$x3); ?></td>
+      <td><?php echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.
+      (  
+          round((number_format($escrever['x1'], 15, '.', ',')*1*round($x1,15)*1), 2) + 
+          round((number_format($escrever['x2'], 15, '.', ',')*1*round($x2,15)*1), 2) + 
+          round((number_format($escrever['x3'], 15, '.', ',')*1*round($x3,15)*1), 2)   
+          ); ?></td>
     </tr>
 <?php } ?>
   </tbody>
@@ -331,6 +338,16 @@ document.getElementById("divInputText").innerHTML = inputText;
 document.getElementById("divInputText").innerHTML = inputText;
 document.getElementById('controle').value = (id-1);  
 }
+</script>
+
+<script>
+      function mudaValorCheck(valor, campo) {
+        if (valor == 2) {
+            document.getElementById('' + campo).value = 1;
+        } else if (valor == 1) {
+            document.getElementById('' + campo).value = 2;
+        }
+    }
 </script>
 
 </html>

@@ -304,7 +304,7 @@ order by id desc;
 
 
 --select round(x1, 4) from ##tmpValores;
-select /*top 100*/ * from ##tmpValores order by id asc;
+select top 1 * from ##tmpValores order by id desc;
 select x1, x2, x3 from ##tmpValorXAbsoluto;
 select x1, x2, x3 from ##tmpValorXRelativo;
 select * from ##inputs
@@ -340,4 +340,9 @@ order by v.id asc;
 	select criterioLinhas, case when criterioLinhas < 1 then 'S' else 'N' end valS from ##criterioLinhas;
 	select * from ##relatórioDeterminantes;
 
+select
+*
+from ##tmpValores v
+
 --select * into inputsBkp2 from inputs;
+--select * from inputs;
