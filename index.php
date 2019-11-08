@@ -125,8 +125,8 @@ if($calcular != '') {
 
   #$autorizaReordena = 1; #Fazer aparecer um radio caso não atinja os critérios, para que o usuário possa escolher
   @$autorizaReordena = $post['reordena'];
-  ($autorizaReordena != 1) ? $autorizaReordena = 0 : '';
-  echo $sp = "exec sp_calcula_sistema_linear $autorizaReordena;";
+  ($autorizaReordena != 1) ? $autorizaReordena = 0 : $autorizaReordena = 1;
+  echo $sp = "exec sp_calcula_sistema_linear '$autorizaReordena';";
   $query = $pdo->prepare($sp);
   $query->execute();
 
