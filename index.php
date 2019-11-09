@@ -72,7 +72,7 @@ b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?
 <button type="button" class="btn btn-primary" onclick="addInput();">+</button>
 <span>Reordenar</span>
 <input type="checkbox" id="reordena" name="reordena" value="1" onchange="mudaValorCheck(this.value, 'reordena');" checked>
-<button type="submit" class="btn btn-primary">Salvar</button>
+<button type="submit" class="btn btn-primary" id="calcular" name="calcular" value="salvar" onclick="salvar();" >Salvar</button>
 <button type="submit" id="calcular" name="calcular" class="btn btn-primary" value="calcular">Calcular</button>
 
 </form>
@@ -84,7 +84,7 @@ b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?
 
 <?php
 
-$calcular = $get['result'];
+@$calcular = $post['calcular'];
 
 
 if(!empty($post['a11'] && $calcular == '') /*&& !empty($post['x1']) && !empty($post['y1'])*/) {
@@ -126,7 +126,7 @@ if($calcular != '') {
   #$autorizaReordena = 1; #Fazer aparecer um radio caso não atinja os critérios, para que o usuário possa escolher
   @$autorizaReordena = $post['reordena'];
   ($autorizaReordena != 1) ? $autorizaReordena = 0 : $autorizaReordena = 1;
-  echo $sp = "exec sp_calcula_sistema_linear '$autorizaReordena';";
+  $sp = "exec sp_calcula_sistema_linear '$autorizaReordena';";
   $query = $pdo->prepare($sp);
   $query->execute();
 
@@ -348,6 +348,11 @@ document.getElementById('controle').value = (id-1);
             document.getElementById('' + campo).value = 2;
         }
     }
+</script>
+<script>
+  function salvar () {
+    document.getElementById('calcular').value = '';
+  }
 </script>
 
 </html>
