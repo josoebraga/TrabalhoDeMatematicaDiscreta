@@ -30,7 +30,7 @@ $query->execute();
 
 <form method="POST">
 <br>
-<Span>Critério de Parada (Usuário): </Span><input type="number" id="criterioDeParadaUser" name="criterioDeParadaUser" value="<?php echo $criterioDeParadaUser; ?>">
+<Span>Critério de Parada (Usuário): </Span><input type="number" id="criterioDeParadaUser" name="criterioDeParadaUser" min="1" value="<?php echo $criterioDeParadaUser; ?>">
 &hArr;
 <Span>Critério de Parada (System):  </Span><input type="text" id="criterioDeParada" name="criterioDeParada" value="10000"readonly>
 &hArr; x1 &#8776;	 b1, x2 &#8776;	 b2 e x3 &#8776; b3; 
