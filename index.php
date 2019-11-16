@@ -25,7 +25,7 @@ $query->execute();
   for($i=1; $escrever = $query->fetch(); $i++){
     $criterioDeParadaUser = $escrever['valor'];
   }
-
+$b[] = array();
 ?>
 
 <form method="POST">
@@ -50,7 +50,7 @@ $id = $escrever['id'];
 a<?php echo $id.'1'; ?><input type='text' id="a<?php echo $id.'1'; ?>" name="a<?php echo $id.'1'; ?>" value="<?php echo number_format($escrever['x1'], 15, '.', ','); ?>">
 a<?php echo $id.'2'; ?><input type='text' id="a<?php echo $id.'2'; ?>" name="a<?php echo $id.'2'; ?>" value="<?php echo number_format($escrever['x2'], 15, '.', ','); ?>">
 a<?php echo $id.'3'; ?><input type='text' id="a<?php echo $id.'3'; ?>" name="a<?php echo $id.'3'; ?>" value="<?php echo number_format($escrever['x3'], 15, '.', ','); ?>"> 
-b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?php echo $id; ?>"     value="<?php echo number_format($escrever['b'], 15, '.', ','); ?>"> 
+b<?php echo $id; ?><input type='text' id="b<?php echo $id; ?>"         name="b<?php echo $id; ?>"     value="<?php $b[$id] = $escrever['b']; echo number_format($escrever['b'], 15, '.', ','); ?>"> 
 <button type="button" class="btn btn-danger" onclick="subInput(<?php echo $id; ?>);">-</button><br>
 <?php
   }
@@ -268,7 +268,19 @@ for($i=1; $escrever = $query->fetch(); $i++){
   ?>    
     <tr>
       <th scope="row"><?php echo $i; ?></th>
-      <td><?php echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.
+      <td title="<?php 
+        $vlrB[$i] = (number_format($b[$i], 15, '.', ',')*1); 
+        (($vlrB[$i] >= 0) ? $bcalc = $vlrB[$i] : $bcalc = ($vlrB[$i] * -1));
+
+        $vlrC = (  
+          round((number_format($escrever['x1'], 15, '.', ',')*1*round($x1,15)*1), 2) + 
+          round((number_format($escrever['x2'], 15, '.', ',')*1*round($x2,15)*1), 2) + 
+          round((number_format($escrever['x3'], 15, '.', ',')*1*round($x3,15)*1), 2)   
+          )*1;
+          $vlrC = number_format($vlrC, 15, '.', ',')*1;
+          (($vlrC >= 0) ? $ccalc = $vlrC : $ccalc = ($vlrC * -1));
+          echo 'Diferença: '.($bcalc - $ccalc);
+        ?>"><?php echo number_format($escrever['x1'], 15, '.', ',').'*'.$x1.'+'.number_format($escrever['x2'], 15, '.', ',').'*'.$x2.'+'.number_format($escrever['x3'], 15, '.', ',').'*'.$x3.' = '.
       (  
           round((number_format($escrever['x1'], 15, '.', ',')*1*round($x1,15)*1), 2) + 
           round((number_format($escrever['x2'], 15, '.', ',')*1*round($x2,15)*1), 2) + 
